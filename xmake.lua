@@ -6,8 +6,6 @@ set_version("1.0.0")
 set_warnings("all", "error")
 set_optimize("fastest")
 
--- Add standard library support
-add_requires("fmt")
 
 -- C++11 features target
 target("cpp11_features")
@@ -48,7 +46,6 @@ target("cpp23_features")
     add_includedirs("include")
     set_targetdir("bin")
     add_languages("c++23")
-    add_packages("fmt")
 
 -- C++26 features target (experimental/proposed features)
 target("cpp26_features")
@@ -57,7 +54,6 @@ target("cpp26_features")
     add_includedirs("include")
     set_targetdir("bin")
     add_languages("c++23") -- Use C++23 as base for experimental features
-    add_packages("fmt")
     -- Enable latest C++ standard for experimental features
     if is_plat("windows") then
         add_cxxflags("/std:c++latest")
@@ -80,14 +76,7 @@ target("examples")
     add_includedirs("include")
     set_targetdir("bin/examples")
     add_languages("c++17")
-    add_packages("fmt")
     set_default(false)
 
--- Test target
-target("tests")
-    set_kind("binary")
-    add_files("tests/*.cpp")
-    add_includedirs("include")
-    set_targetdir("bin/tests")
-    add_languages("c++17")
-    set_default(false)
+-- Include third-party library examples from tests directory
+includes("tests")

@@ -1,5 +1,6 @@
 #include "../include/utils.h"
 #include <iostream>
+#include <vector>
 
 // Simple example demonstrating basic modern C++ usage
 int main() {
