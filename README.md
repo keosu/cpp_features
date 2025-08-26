@@ -2,7 +2,7 @@
 
 [![C++ Standards](https://img.shields.io/badge/C%2B%2B-11%2F14%2F17%2F20%2F23-blue.svg)](https://en.cppreference.com/)
 [![Build System](https://img.shields.io/badge/Build%20System-xmake-green.svg)](https://xmake.io)
-[![License](https://img.shields.io/badge/License-Educational-yellow.svg)](#)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2FLinux%2FmacOS-lightgrey.svg)](#)
 
 > 🎯 **一个全面展示C++演进历程的教学项目**  
