@@ -42,6 +42,54 @@ std::print("Hello {}!\n", "C++23");
 std::flat_map<string, int> fast_lookup;
 ```
 
+## 🚀 快速开始
+
+### 1️⃣ 克隆并构建
+```bash
+# 克隆项目（如果从远程仓库）
+git clone <repository-url>
+cd cpp_features
+
+# 构建所有程序
+xmake
+```
+
+### 2️⃣ 运行演示
+```bash
+# 主程序 - 综合展示
+xmake run modern_cpp_showcase
+
+# 单独的C++标准演示
+xmake run cpp11_features   # C++11特性
+xmake run cpp17_features   # C++17特性  
+xmake run cpp20_features   # C++20特性
+```
+
+### 3️⃣ 浏览源代码
+- 📁 **`src/cpp11/main.cpp`** - C++11基础特性（auto, lambda, 智能指针）
+- 📁 **`src/cpp17/main.cpp`** - C++17语言增强（结构化绑定, optional, variant）
+- 📁 **`src/cpp20/main.cpp`** - C++20革命性特性（concepts, ranges, coroutines）
+
+## 📈 版本特性对比
+
+| 📅 版本 | 🚀 核心特性 | 📊 影响级别 | 📝 示例代码 |
+|---------|------------|------------|------------|
+| **C++11** | Auto, Lambda, Smart Pointers | 🔴 **革命性** | `auto ptr = std::make_unique<T>();` |
+| **C++14** | Generic Lambdas, Auto Return | 🟡 **增量式** | `auto func = [](auto x) { return x; };` |
+| **C++17** | Structured Bindings, Optional | 🟠 **重大** | `auto [x, y] = std::make_pair(1, 2);` |
+| **C++20** | Concepts, Ranges, Coroutines | 🔴 **革命性** | `std::ranges::sort(container);` |
+| **C++23** | Expected, Print, Flat Maps | 🟢 **改进** | `std::print("Hello {}!\n", name);` |
+
+## 🎆 项目亮点
+
+✨ **全面性**: 从 C++11 到 C++23 的完整覆盖  
+🛠️ **现代化**: 使用 xmake 现代构建系统  
+📚 **教学导向**: 每个特性都有详细的代码示例和说明  
+🚀 **即用**: 克隆即可运行，无需复杂配置  
+🌐 **跨平台**: 支持 Windows/Linux/macOS  
+📝 **文档完善**: 详细的 README 和代码注释  
+🔍 **实用性**: 可作为学习资源或面试准备
+
 ## 🚀 Project Overview
 
 This project demonstrates the key features introduced in modern C++ standards:
