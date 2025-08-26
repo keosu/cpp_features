@@ -7,21 +7,23 @@ int main() {
     cpp_features::Demo::print_header("Modern C++ Features Showcase");
     
     std::cout << "Welcome to the Modern C++ Features Showcase!\n";
-    std::cout << "This interactive program demonstrates C++ evolution from C++11 to C++23.\n\n";
+    std::cout << "This interactive program demonstrates C++ evolution from C++11 to C++26.\n\n";
     
     std::cout << "Available demonstrations:\n";
     std::cout << "  1. C++11 Features - Foundation of modern C++\n";
     std::cout << "  2. C++14 Features - Incremental improvements\n";
     std::cout << "  3. C++17 Features - Major language enhancements\n";
     std::cout << "  4. C++20 Features - Revolutionary changes\n";
-    std::cout << "  5. C++23 Features - Latest additions\n\n";
+    std::cout << "  5. C++23 Features - Latest additions\n";
+    std::cout << "  6. C++26 Features - Experimental preview\n\n";
     
     std::cout << "To run individual demonstrations:\n";
     std::cout << "  xmake run cpp11_features\n";
     std::cout << "  xmake run cpp14_features\n";
     std::cout << "  xmake run cpp17_features\n";
     std::cout << "  xmake run cpp20_features\n";
-    std::cout << "  xmake run cpp23_features\n\n";
+    std::cout << "  xmake run cpp23_features\n";
+    std::cout << "  xmake run cpp26_features  # Experimental preview\n\n";
     
     // Simple demo of some basic modern C++ features
     std::cout << "Quick Modern C++ Demo:\n\n";
