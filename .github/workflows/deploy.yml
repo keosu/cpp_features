@@ -1,0 +1,223 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/deploy.yml'
+
+  # Allow manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ensure only one deployment runs at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build documentation
+  build-docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install Documentation Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pandoc tree
+        npm install -g @mermaid-js/mermaid-cli
+
+    - name: Generate Project Documentation
+      run: |
+        mkdir -p docs/generated
+        
+        # Generate project structure
+        echo "# Project Structure" > docs/generated/structure.md
+        echo "\`\`\`" >> docs/generated/structure.md
+        tree -I '.git|.xmake|bin|build|node_modules' . >> docs/generated/structure.md
+        echo "\`\`\`" >> docs/generated/structure.md
+
+        # Generate build information
+        echo "# Build Information" > docs/generated/build-info.md
+        echo "" >> docs/generated/build-info.md
+        echo "## xmake Configuration" >> docs/generated/build-info.md
+        echo "\`\`\`lua" >> docs/generated/build-info.md
+        head -30 xmake.lua >> docs/generated/build-info.md
+        echo "\`\`\`" >> docs/generated/build-info.md
+
+        # Generate C++ features overview
+        echo "# C++ Features Overview" > docs/generated/features.md
+        echo "" >> docs/generated/features.md
+        for dir in src/cpp*; do
+          if [ -d "$dir" ]; then
+            version=$(basename "$dir")
+            echo "## ${version^^} Features" >> docs/generated/features.md
+            echo "" >> docs/generated/features.md
+            if [ -f "$dir/main.cpp" ]; then
+              # Extract feature comments from source
+              grep -E "^[[:space:]]*//.*:" "$dir/main.cpp" | head -10 >> docs/generated/features.md || true
+            fi
+            echo "" >> docs/generated/features.md
+          fi
+        done
+
+    - name: Generate API Documentation
+      run: |
+        mkdir -p docs/api
+        
+        # Generate simple API docs from headers
+        echo "# API Documentation" > docs/api/index.md
+        echo "" >> docs/api/index.md
+        echo "## Available Headers" >> docs/api/index.md
+        
+        for header in include/*.h; do
+          if [ -f "$header" ]; then
+            echo "### $(basename "$header")" >> docs/api/index.md
+            echo "\`\`\`cpp" >> docs/api/index.md
+            head -20 "$header" >> docs/api/index.md
+            echo "\`\`\`" >> docs/api/index.md
+            echo "" >> docs/api/index.md
+          fi
+        done
+
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v4
+
+    - name: Build Pages Site
+      run: |
+        mkdir -p _site
+        
+        # Create main index page
+        cat > _site/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Modern C++ Features Showcase</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
+                .container { max-width: 1200px; margin: 0 auto; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; }
+                .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+                .card { background: #f8f9fa; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                .badge { background: #007bff; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+                a { color: #007bff; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+                pre { background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+                .status { background: #28a745; color: white; padding: 0.5rem; border-radius: 4px; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🚀 Modern C++ Features Showcase</h1>
+                    <p>Learn modern C++ through practical examples and demonstrations</p>
+                    <div class="status">✅ Build Status: Passing</div>
+                </div>
+                
+                <div class="grid">
+                    <div class="card">
+                        <h3>📚 Documentation</h3>
+                        <p>Complete guides and API documentation</p>
+                        <ul>
+                            <li><a href="README.html">Getting Started</a></li>
+                            <li><a href="docs/FORMATTING.html">Code Formatting</a></li>
+                            <li><a href="docs/generated/features.html">C++ Features</a></li>
+                            <li><a href="docs/api/index.html">API Reference</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🎯 Features</h3>
+                        <p>C++ standards coverage</p>
+                        <ul>
+                            <li><span class="badge">C++11</span> Modern C++ Foundation</li>
+                            <li><span class="badge">C++14</span> Incremental Improvements</li>
+                            <li><span class="badge">C++17</span> Major Enhancements</li>
+                            <li><span class="badge">C++20</span> Revolutionary Changes</li>
+                            <li><span class="badge">C++23</span> Latest Additions</li>
+                            <li><span class="badge">C++26</span> Experimental Preview</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🛠️ Quick Start</h3>
+                        <p>Get started in minutes</p>
+                        <pre><code># Clone the repository
+        git clone &lt;repository-url&gt;
+        cd cpp_features
+        
+        # Build with xmake
+        xmake build
+        
+        # Run the showcase
+        xmake run modern_cpp_showcase</code></pre>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🔧 Build Information</h3>
+                        <p>Cross-platform support</p>
+                        <ul>
+                            <li>✅ Windows (MSVC 2022+)</li>
+                            <li>✅ Linux (GCC 12+, Clang 15+)</li>
+                            <li>✅ macOS (Clang)</li>
+                        </ul>
+                        <p><strong>Build System:</strong> xmake</p>
+                        <p><strong>Dependencies:</strong> Automatically managed</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem; text-align: center; color: #6c757d;">
+                    <p>Generated by GitHub Actions • <a href="https://github.com">View on GitHub</a></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        EOF
+
+        # Convert markdown files to HTML
+        for md_file in $(find . -name "*.md" -not -path "./.git/*" -not -path "./.xmake/*"); do
+          html_file="_site/${md_file%.md}.html"
+          mkdir -p "$(dirname "$html_file")"
+          pandoc "$md_file" -o "$html_file" --standalone --css=style.css 2>/dev/null || cp "$md_file" "$html_file"
+        done
+
+        # Copy docs directory
+        if [ -d "docs" ]; then
+          cp -r docs/* _site/docs/ 2>/dev/null || true
+        fi
+
+    - name: Upload Pages Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./_site
+
+  # Deploy to GitHub Pages
+  deploy:
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-docs
+    
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

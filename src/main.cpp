@@ -209,7 +209,8 @@ class FeatureShowcase {
     cpp_features::Demo::print_header("C++11 - Smart Pointers");
 
     {
-      auto ptr = std::make_unique<int>(42);
+      // C++11 way - using constructor (make_unique is C++14)
+      std::unique_ptr<int> ptr(new int(42));
       cpp_features::Demo::print_value("unique_ptr value", *ptr);
     }
     std::cout << "  unique_ptr automatically cleaned up\n";

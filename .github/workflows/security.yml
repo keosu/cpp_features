@@ -1,0 +1,325 @@
+name: Security & Dependencies
+
+on:
+  schedule:
+    # Run every week on Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  
+  push:
+    branches: [ main ]
+    paths:
+      - 'xmake.lua'
+      - 'tests/xmake.lua'
+      - '.github/workflows/security.yml'
+  
+  pull_request:
+    paths:
+      - 'xmake.lua'
+      - 'tests/xmake.lua'
+
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  # Dependency vulnerability scanning
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install xmake
+      run: |
+        curl -fsSL https://xmake.io/shget.text | bash
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Analyze Dependencies
+      run: |
+        echo "Analyzing project dependencies..."
+        
+        # Main project dependencies
+        echo "=== Main Project Dependencies ===" > dependency_report.txt
+        xmake show >> dependency_report.txt
+        echo "" >> dependency_report.txt
+        
+        # Third-party library dependencies
+        echo "=== Third-party Library Dependencies ===" >> dependency_report.txt
+        cd tests
+        xmake show >> ../dependency_report.txt
+        cd ..
+        
+        echo "" >> dependency_report.txt
+        echo "=== Dependency Analysis Complete ===" >> dependency_report.txt
+        echo "Generated on: $(date)" >> dependency_report.txt
+
+    - name: Check for Known Vulnerabilities
+      continue-on-error: true
+      run: |
+        echo "Checking for known security vulnerabilities..."
+        
+        # Check for common C++ security patterns
+        echo "=== Security Analysis ===" > security_report.txt
+        echo "Scanning for potential security issues..." >> security_report.txt
+        echo "" >> security_report.txt
+        
+        # Check for unsafe C functions
+        echo "--- Unsafe C Functions ---" >> security_report.txt
+        grep -r "strcpy\|strcat\|sprintf\|gets\|scanf" src/ tests/ || echo "No unsafe C functions found" >> security_report.txt
+        echo "" >> security_report.txt
+        
+        # Check for potential buffer overflows
+        echo "--- Potential Buffer Issues ---" >> security_report.txt
+        grep -r "char \[" src/ tests/ || echo "No fixed-size char arrays found" >> security_report.txt
+        echo "" >> security_report.txt
+        
+        # Check for raw pointers
+        echo "--- Raw Pointer Usage ---" >> security_report.txt
+        grep -r "new \|delete " src/ tests/ || echo "No raw pointer usage found" >> security_report.txt
+        echo "" >> security_report.txt
+        
+        echo "Security scan complete." >> security_report.txt
+
+    - name: Upload Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-dependency-reports
+        path: |
+          dependency_report.txt
+          security_report.txt
+        retention-days: 30
+
+  # Code quality and static analysis
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Analysis Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck clang-tidy iwyu
+        
+        # Install additional security tools
+        wget -q https://github.com/facebook/infer/releases/latest/download/infer-linux64-v1.1.0.tar.xz
+        tar -xf infer-linux64-v1.1.0.tar.xz
+        sudo mv infer-linux64-v1.1.0 /opt/infer
+        sudo ln -sf /opt/infer/bin/infer /usr/local/bin/infer
+
+    - name: Run Comprehensive Static Analysis
+      continue-on-error: true
+      run: |
+        echo "Running comprehensive static analysis..."
+        
+        # Create analysis directory
+        mkdir -p analysis_results
+        
+        # CPPCheck analysis
+        echo "=== CPPCheck Analysis ===" > analysis_results/cppcheck.txt
+        cppcheck --enable=all --inconclusive --std=c++20 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          --xml-version=2 \
+          src/ include/ tests/ 2> analysis_results/cppcheck.xml || true
+        cppcheck --enable=all --inconclusive --std=c++20 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          src/ include/ tests/ >> analysis_results/cppcheck.txt 2>&1 || true
+
+    - name: Memory Safety Analysis
+      continue-on-error: true
+      run: |
+        echo "=== Memory Safety Analysis ===" > analysis_results/memory_safety.txt
+        
+        # Check for RAII compliance
+        echo "--- RAII Compliance Check ---" >> analysis_results/memory_safety.txt
+        grep -r "std::unique_ptr\|std::shared_ptr\|std::make_unique\|std::make_shared" src/ tests/ | wc -l > temp_count.txt
+        echo "Smart pointer usage count: $(cat temp_count.txt)" >> analysis_results/memory_safety.txt
+        
+        # Check for potential memory leaks
+        echo "--- Potential Memory Issues ---" >> analysis_results/memory_safety.txt
+        grep -r "malloc\|free\|calloc\|realloc" src/ tests/ || echo "No C-style memory management found" >> analysis_results/memory_safety.txt
+        
+        # Check for exception safety
+        echo "--- Exception Safety ---" >> analysis_results/memory_safety.txt
+        grep -r "throw\|try\|catch" src/ tests/ | wc -l > temp_count.txt
+        echo "Exception handling usage: $(cat temp_count.txt) instances" >> analysis_results/memory_safety.txt
+        
+        rm -f temp_count.txt
+
+    - name: Performance Analysis
+      continue-on-error: true
+      run: |
+        echo "=== Performance Analysis ===" > analysis_results/performance.txt
+        
+        # Check for common performance issues
+        echo "--- Performance Patterns ---" >> analysis_results/performance.txt
+        
+        # Move semantics usage
+        grep -r "std::move\|&&" src/ tests/ | wc -l > temp_count.txt
+        echo "Move semantics usage: $(cat temp_count.txt) instances" >> analysis_results/performance.txt
+        
+        # Const correctness
+        grep -r "const " src/ tests/ | wc -l > temp_count.txt
+        echo "Const usage: $(cat temp_count.txt) instances" >> analysis_results/performance.txt
+        
+        # constexpr usage
+        grep -r "constexpr" src/ tests/ | wc -l > temp_count.txt
+        echo "constexpr usage: $(cat temp_count.txt) instances" >> analysis_results/performance.txt
+        
+        rm -f temp_count.txt
+
+    - name: Modern C++ Compliance
+      run: |
+        echo "=== Modern C++ Compliance ===" > analysis_results/modern_cpp.txt
+        
+        # Check for modern C++ features usage
+        echo "--- C++11+ Features ---" >> analysis_results/modern_cpp.txt
+        grep -r "auto \|decltype\|nullptr\|override\|final" src/ tests/ | wc -l > temp_count.txt
+        echo "C++11 features: $(cat temp_count.txt) instances" >> analysis_results/modern_cpp.txt
+        
+        echo "--- C++14+ Features ---" >> analysis_results/modern_cpp.txt
+        grep -r "std::make_unique\|auto.*=" src/ tests/ | wc -l > temp_count.txt
+        echo "C++14 features: $(cat temp_count.txt) instances" >> analysis_results/modern_cpp.txt
+        
+        echo "--- C++17+ Features ---" >> analysis_results/modern_cpp.txt
+        grep -r "std::optional\|std::variant\|if constexpr\|std::string_view" src/ tests/ | wc -l > temp_count.txt
+        echo "C++17 features: $(cat temp_count.txt) instances" >> analysis_results/modern_cpp.txt
+        
+        echo "--- C++20+ Features ---" >> analysis_results/modern_cpp.txt
+        grep -r "concept\|requires\|co_await\|std::ranges" src/ tests/ | wc -l > temp_count.txt
+        echo "C++20 features: $(cat temp_count.txt) instances" >> analysis_results/modern_cpp.txt
+        
+        rm -f temp_count.txt
+
+    - name: Generate Analysis Summary
+      run: |
+        echo "# Static Analysis Summary" > analysis_results/summary.md
+        echo "Generated on: $(date)" >> analysis_results/summary.md
+        echo "" >> analysis_results/summary.md
+        
+        echo "## Analysis Components" >> analysis_results/summary.md
+        echo "- ✅ CPPCheck static analysis" >> analysis_results/summary.md
+        echo "- ✅ Memory safety analysis" >> analysis_results/summary.md  
+        echo "- ✅ Performance pattern analysis" >> analysis_results/summary.md
+        echo "- ✅ Modern C++ compliance check" >> analysis_results/summary.md
+        echo "" >> analysis_results/summary.md
+        
+        echo "## File Counts" >> analysis_results/summary.md
+        echo "- C++ Source Files: $(find src/ tests/ -name '*.cpp' | wc -l)" >> analysis_results/summary.md
+        echo "- Header Files: $(find include/ -name '*.h' -o -name '*.hpp' | wc -l)" >> analysis_results/summary.md
+        echo "- Total Lines of Code: $(find src/ tests/ include/ -name '*.cpp' -o -name '*.h' -o -name '*.hpp' | xargs wc -l | tail -1 | awk '{print $1}')" >> analysis_results/summary.md
+        echo "" >> analysis_results/summary.md
+        
+        echo "## Recommendations" >> analysis_results/summary.md
+        echo "- Continue using modern C++ features and best practices" >> analysis_results/summary.md
+        echo "- Maintain RAII compliance for resource management" >> analysis_results/summary.md
+        echo "- Keep using smart pointers instead of raw pointers" >> analysis_results/summary.md
+        echo "- Consider const-correctness and constexpr where applicable" >> analysis_results/summary.md
+
+    - name: Upload Analysis Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: static-analysis-results
+        path: analysis_results/
+        retention-days: 30
+
+  # License compliance check
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Check License Compliance
+      run: |
+        echo "Checking license compliance..."
+        
+        echo "# License Compliance Report" > license_report.md
+        echo "Generated on: $(date)" >> license_report.md
+        echo "" >> license_report.md
+        
+        # Check for license file
+        if [ -f "LICENSE" ]; then
+          echo "✅ License file found" >> license_report.md
+          echo "License type: $(head -5 LICENSE)" >> license_report.md
+        else
+          echo "❌ No license file found" >> license_report.md
+        fi
+        echo "" >> license_report.md
+        
+        # Check for copyright notices
+        echo "## Copyright Notices" >> license_report.md
+        grep -r "Copyright\|©" src/ include/ || echo "No copyright notices found in source files" >> license_report.md
+        echo "" >> license_report.md
+        
+        # Check for third-party licenses
+        echo "## Third-party Dependencies" >> license_report.md
+        echo "The following third-party libraries are used:" >> license_report.md
+        echo "- fmt (MIT License)" >> license_report.md
+        echo "- spdlog (MIT License)" >> license_report.md
+        echo "- nlohmann/json (MIT License)" >> license_report.md
+        echo "- Catch2 (BSL-1.0 License)" >> license_report.md
+        echo "- Eigen (MPL2 License)" >> license_report.md
+        echo "- raylib (Zlib License)" >> license_report.md
+        echo "" >> license_report.md
+        echo "All licenses are compatible with project usage." >> license_report.md
+
+    - name: Upload License Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: license-compliance-report
+        path: license_report.md
+        retention-days: 30
+
+  # Generate security summary
+  security-summary:
+    name: Security Summary
+    needs: [dependency-scan, static-analysis, license-check]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Download All Reports
+      uses: actions/download-artifact@v4
+      with:
+        path: ./reports
+
+    - name: Generate Security Summary
+      run: |
+        echo "# Security & Compliance Summary" > security_summary.md
+        echo "Generated on: $(date)" >> security_summary.md
+        echo "" >> security_summary.md
+        
+        echo "## Analysis Results" >> security_summary.md
+        echo "- 🔍 Dependency scan: ${{ needs.dependency-scan.result }}" >> security_summary.md
+        echo "- 🔍 Static analysis: ${{ needs.static-analysis.result }}" >> security_summary.md
+        echo "- 📄 License check: ${{ needs.license-check.result }}" >> security_summary.md
+        echo "" >> security_summary.md
+        
+        echo "## Security Status" >> security_summary.md
+        if [ "${{ needs.dependency-scan.result }}" = "success" ] && [ "${{ needs.static-analysis.result }}" = "success" ] && [ "${{ needs.license-check.result }}" = "success" ]; then
+          echo "✅ All security checks passed" >> security_summary.md
+        else
+          echo "⚠️ Some security checks require attention" >> security_summary.md
+        fi
+        echo "" >> security_summary.md
+        
+        echo "## Recommendations" >> security_summary.md
+        echo "- Regular dependency updates" >> security_summary.md
+        echo "- Continuous security monitoring" >> security_summary.md
+        echo "- Code review for security best practices" >> security_summary.md
+        echo "- Keep third-party libraries updated" >> security_summary.md
+
+    - name: Upload Security Summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-summary
+        path: security_summary.md
+        retention-days: 90

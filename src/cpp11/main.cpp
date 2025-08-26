@@ -75,10 +75,11 @@ class ResourceManager {
 void demo_smart_pointers() {
   cpp_features::Demo::print_section("Smart Pointers");
 
-  // unique_ptr
+  // unique_ptr (C++11)
   {
     std::cout << "  unique_ptr example:\n";
-    auto resource = std::make_unique<ResourceManager>("unique_resource");
+    // C++11 way - using constructor (make_unique is C++14)
+    std::unique_ptr<ResourceManager> resource(new ResourceManager("unique_resource"));
     resource->use();
     // Automatically destroyed when going out of scope
   }
@@ -86,6 +87,7 @@ void demo_smart_pointers() {
   // shared_ptr
   {
     std::cout << "\n  shared_ptr example:\n";
+    // make_shared is available in C++11
     auto resource1 = std::make_shared<ResourceManager>("shared_resource");
     {
       auto resource2 = resource1;  // Shared ownership
