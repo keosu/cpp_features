@@ -53,6 +53,20 @@ target("cpp23_features")
     set_targetdir("bin")
     add_packages("fmt")
 
+-- C++26 features target (experimental/proposed features)
+target("cpp26_features")
+    set_kind("binary")
+    add_files("src/cpp26/*.cpp")
+    add_includedirs("include")
+    set_targetdir("bin")
+    add_packages("fmt", "range-v3")
+    -- Enable latest C++ standard for experimental features
+    if is_plat("windows") then
+        add_cxxflags("/std:c++latest")
+    else
+        add_cxxflags("-std=c++2c") -- or -std=c++26 when available
+    end
+
 -- Main showcase program
 target("modern_cpp_showcase")
     set_kind("binary")

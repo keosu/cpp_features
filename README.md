@@ -42,6 +42,16 @@ std::print("Hello {}!\n", "C++23");
 std::flat_map<string, int> fast_lookup;
 ```
 
+### 🚧 **C++26 - 实验性预览**
+```cpp
+// 反射 + 模式匹配 + 合约 (提案中)
+constexpr auto members = std::meta::members_of(^MyClass);
+auto result = value inspect { 0 => "zero", _ => "other" };
+int divide(int a, int b) pre: b != 0 { return a/b; }
+```
+
+> ⚠️ **注意**: C++26特性仍在开发中，大部分特性为提案阶段
+
 ## 🚀 快速开始
 
 ### 1️⃣ 克隆并构建
@@ -63,12 +73,14 @@ xmake run modern_cpp_showcase
 xmake run cpp11_features   # C++11特性
 xmake run cpp17_features   # C++17特性  
 xmake run cpp20_features   # C++20特性
+xmake run cpp26_features   # C++26预览 (实验性)
 ```
 
 ### 3️⃣ 浏览源代码
 - 📁 **`src/cpp11/main.cpp`** - C++11基础特性（auto, lambda, 智能指针）
 - 📁 **`src/cpp17/main.cpp`** - C++17语言增强（结构化绑定, optional, variant）
 - 📁 **`src/cpp20/main.cpp`** - C++20革命性特性（concepts, ranges, coroutines）
+- 📁 **`src/cpp26/main.cpp`** - C++26实验预览（reflection, pattern matching, contracts）
 
 ## 📈 版本特性对比
 
@@ -79,6 +91,7 @@ xmake run cpp20_features   # C++20特性
 | **C++17** | Structured Bindings, Optional | 🟠 **重大** | `auto [x, y] = std::make_pair(1, 2);` |
 | **C++20** | Concepts, Ranges, Coroutines | 🔴 **革命性** | `std::ranges::sort(container);` |
 | **C++23** | Expected, Print, Flat Maps | 🟢 **改进** | `std::print("Hello {}!\n", name);` |
+| **C++26** | Reflection, Pattern Matching | 🚧 **实验** | `auto result = val inspect { 0 => "zero" };` |
 
 ## 🎆 项目亮点
 
@@ -99,6 +112,7 @@ This project demonstrates the key features introduced in modern C++ standards:
 - **C++17**: Major language enhancements (structured bindings, std::optional, std::variant)
 - **C++20**: Revolutionary changes (concepts, ranges, coroutines, modules)
 - **C++23**: Latest additions (std::expected, flat containers, std::print)
+- **C++26**: 🚧 **Experimental Preview** (reflection, pattern matching, contracts)
 
 ## 📁 Project Structure
 
@@ -179,6 +193,7 @@ xmake run cpp14_features
 xmake run cpp17_features
 xmake run cpp20_features
 xmake run cpp23_features
+xmake run cpp26_features   # Experimental preview
 
 # Run examples
 xmake run examples
@@ -244,6 +259,19 @@ xmake run examples
 - **Ranges improvements**: Additional views and algorithms
 - **String contains**: `std::string::contains()`
 
+### C++26 Features (Experimental Preview)
+- **Reflection**: Compile-time type and member introspection
+- **Pattern matching**: Structural matching with `inspect` expressions
+- **Contracts**: Built-in precondition/postcondition assertions
+- **Enhanced constexpr**: More compile-time capabilities
+- **Improved modules**: Better tooling and standardization
+- **Linear algebra**: Standard mathematical operations library
+- **Networking**: Standard networking and socket interface
+- **Advanced ranges**: Additional views and algorithms
+- **Hazard pointers**: Lock-free memory reclamation
+
+> ⚠️ **Important**: C++26 features are currently proposals and experimental. Most are not yet available in production compilers.
+
 ## 💡 Usage Examples
 
 ### Interactive Menu
@@ -279,8 +307,9 @@ Different compilers have varying levels of support for modern C++ features:
 | C++17 | 7.0+ | 5.0+ | 2017+ |
 | C++20 | 10.0+ | 10.0+ | 2019+ |
 | C++23 | 12.0+ | 15.0+ | 2022+ |
+| C++26 | 🚧 Experimental | 🚧 Experimental | 🚧 Experimental |
 
-**Note**: Some C++23 features may require even newer compiler versions or may not be fully implemented yet.
+**Note**: C++26 is currently in development. Most features are experimental proposals and not yet available in production compilers.
 
 ## 🧪 Testing
 
