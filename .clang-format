@@ -1,0 +1,99 @@
+---
+# Google C++ Style Guide Configuration for clang-format
+BasedOnStyle: Google
+
+# Language settings
+Language: Cpp
+Standard: c++17
+
+# Indentation
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+
+# Line length
+ColumnLimit: 100
+
+# Access modifiers
+AccessModifierOffset: -1
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
+AlignTrailingComments: true
+
+# Braces
+BreakBeforeBraces: Attach
+
+# Line breaks
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+
+# Empty lines
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+# Pointers and references
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Sorting
+SortIncludes: true
+SortUsingDeclarations: true
+
+# Spaces
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: false
+SpacesInContainerLiterals: true
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Other settings
+BinPackArguments: true
+BinPackParameters: true
+FixNamespaceComments: true
+ReflowComments: true
+
+# Preprocessor directives
+IndentPPDirectives: None
+
+# C++11 features
+Cpp11BracedListStyle: true
+
+# Include sorting
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:    '<[[:alnum:]._]+>'
+    Priority: 1
+  - Regex:    '<[[:alnum:]._/]+>'
+    Priority: 2
+  - Regex:    '<[[:alnum:]._/]+\.h>'
+    Priority: 3
+  - Regex:    '".*"'
+    Priority: 4
+
+# Templates
+AlwaysBreakTemplateDeclarations: Yes
+
+# Namespaces
+NamespaceIndentation: None
+CompactNamespaces: false
+
+# Modern C++ features
+AllowShortEnumsOnASingleLine: true
+
+# Disable operator spacing for spaceship operator to prevent "<= >" formatting
+SpaceBeforeRangeBasedForLoopColon: true
