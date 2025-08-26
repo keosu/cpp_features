@@ -8,7 +8,7 @@ set_warnings("all", "error")
 set_optimize("fastest")
 
 -- Add standard library support
-add_requires("fmt", "range-v3")
+add_requires("fmt")
 
 -- Common compile options
 add_cxxflags("-std=c++23", "-Wall", "-Wextra")
@@ -43,7 +43,6 @@ target("cpp20_features")
     add_files("src/cpp20/*.cpp")
     add_includedirs("include")
     set_targetdir("bin")
-    add_packages("range-v3")
 
 -- C++23 features target
 target("cpp23_features")
@@ -59,7 +58,7 @@ target("cpp26_features")
     add_files("src/cpp26/*.cpp")
     add_includedirs("include")
     set_targetdir("bin")
-    add_packages("fmt", "range-v3")
+    add_packages("fmt")
     -- Enable latest C++ standard for experimental features
     if is_plat("windows") then
         add_cxxflags("/std:c++latest")
@@ -80,7 +79,7 @@ target("examples")
     add_files("examples/*.cpp")
     add_includedirs("include")
     set_targetdir("bin/examples")
-    add_packages("fmt", "range-v3")
+    add_packages("fmt")
     set_default(false)
 
 -- Test target

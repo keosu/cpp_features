@@ -147,9 +147,8 @@ cpp_features/
 - **C++ Compiler**: Supporting C++23 (GCC 12+, Clang 15+, MSVC 2022+)
 
 ### Optional Dependencies
-The project will automatically install these via xmake:
-- **fmt**: Modern formatting library
-- **range-v3**: Range library implementation
+The project will automatically install this via xmake:
+- **fmt**: Modern formatting library (for C++23 std::format fallback)
 
 ## 🔧 Building the Project
 
